@@ -1,0 +1,39 @@
+---
+# Demo Ansible Playbook for ansible-pull
+# Usage: ansible-pull -U <repo-url> local.yml
+#
+# This playbook demonstrates common tasks that can be automated
+# using ansible-pull for local machine configuration
+
+- name: Configure local machine
+  hosts: localhost
+  connection: local
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Update package cache (Ubuntu/Debian)
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+    - name: Update package cache (RHEL/CentOS)
+      ansible.builtin.yum:
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
