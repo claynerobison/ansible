@@ -80,7 +80,6 @@ write_files:
       Started at system boot via cloud-init
 
 
-
 # Run commands after package installation
 runcmd:
   # Create log directory
