@@ -68,7 +68,7 @@ write_files:
           --inventory demo/inventory \
           --verbose \
           "$PLAYBOOK" >> "$LOGFILE" 2>&1
-      
+
       echo "$(date): ansible-pull completed" >> "$LOGFILE"
 
   # Create initial log file
@@ -89,11 +89,11 @@ runcmd:
   - touch /var/log/ansible-pull.log
   - chmod 644 /var/log/ansible-pull.log
 
-  # Run initial ansible-pull demo
-  - /usr/local/bin/run-ansible-pull.sh
+  # Wait for system to be fully ready
+  - sleep 30
 
-  # Wait a moment for the initial run to complete
-  - sleep 10
+  # Run initial ansible-pull demo (script is now available from write_files)
+  - /usr/local/bin/run-ansible-pull.sh
 
   # Set up cron job to run ansible-pull every minute
   - echo "* * * * * root /usr/local/bin/run-ansible-pull.sh" >> /etc/crontab

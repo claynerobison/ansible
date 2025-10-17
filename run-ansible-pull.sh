@@ -7,7 +7,12 @@ set -e
 
 REPO_URL="https://github.com/claynerobison/ansible.git"
 PLAYBOOK="demo/local.yml"
-LOGFILE="/var/log/ansible-pull.log"
+if [ -w /var/log ]; then
+    LOGFILE="/var/log/ansible-pull.log"
+else
+    LOGFILE="$HOME/ansible-pull.log"
+    echo "Warning: /var/log is not writable. Logging to $LOGFILE"
+fi
 
 echo "Starting ansible-pull at $(date)"
 
