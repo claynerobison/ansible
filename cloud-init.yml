@@ -1,0 +1,140 @@
+#cloud-config
+# Cloud-init configuration for Ubuntu 24.04 LTS
+# This file configures a fresh Ubuntu installation to:
+# - Install Ansible and dependencies
+# - Run the ansible-pull demo
+# - Schedule ansible-pull to run every minute via cron
+
+# Update package database on first boot
+package_update: true
+package_upgrade: true
+
+# Install required packages
+packages:
+  - ansible
+  - git
+  - curl
+
+# Uncomment and modify if you need a specific user account
+# users:
+#   - name: your-username
+#     groups: sudo
+#     shell: /bin/bash
+#     sudo: ['ALL=(ALL) NOPASSWD:ALL']
+#     ssh_authorized_keys:
+#       - ssh-rsa AAAAB3NzaC1yc2E... # Add your SSH public key here
+
+# Write files to the system
+write_files:
+  # Create a script to run ansible-pull
+  - path: /usr/local/bin/run-ansible-pull.sh
+    permissions: '0755'
+    owner: root:root
+    content: |
+      #!/bin/bash
+      
+      # Ansible Pull Demo Runner
+      # This script runs the ansible-pull demo from the repository
+      
+      set -e
+      
+      REPO_URL="https://github.com/claynerobison/ansible.git"
+      PLAYBOOK="demo/local.yml"
+      LOGFILE="/var/log/ansible-pull.log"
+      LOCKFILE="/var/run/ansible-pull.lock"
+      
+      # Prevent multiple instances from running
+      if [ -f "$LOCKFILE" ]; then
+          echo "$(date): Ansible-pull already running, skipping..." >> "$LOGFILE"
+          exit 0
+      fi
+      
+      # Create lock file
+      touch "$LOCKFILE"
+      
+      # Cleanup function
+      cleanup() {
+          rm -f "$LOCKFILE"
+      }
+      trap cleanup EXIT
+      
+      echo "$(date): Starting ansible-pull" >> "$LOGFILE"
+      
+      # Run ansible-pull
+      ansible-pull \
+          --url "$REPO_URL" \
+          --checkout main \
+          --directory /tmp/ansible-pull \
+          --inventory demo/inventory \
+          --verbose \
+          "$PLAYBOOK" >> "$LOGFILE" 2>&1
+
+      echo "$(date): ansible-pull completed" >> "$LOGFILE"
+
+  # Create initial log file
+  - path: /var/log/ansible-pull.log
+    permissions: '0644'
+    owner: root:root
+    content: |
+      Ansible Pull Demo Log
+      Started at system boot via cloud-init
+
+
+# Run commands after package installation
+runcmd:
+  # Create log directory
+  - mkdir -p /var/log
+
+  # Set proper permissions on log file
+  - touch /var/log/ansible-pull.log
+  - chmod 644 /var/log/ansible-pull.log
+
+  # Wait for system to be fully ready
+  - sleep 30
+
+  # Run initial ansible-pull demo (script is now available from write_files)
+  - /usr/local/bin/run-ansible-pull.sh
+
+  # Set up cron job to run ansible-pull every minute
+  - echo "* * * * * root /usr/local/bin/run-ansible-pull.sh" >> /etc/crontab
+
+  # Restart cron service to pick up new job
+  - systemctl restart cron
+
+  # Log the completion of cloud-init setup
+  - echo "$(date): Cloud-init setup completed, ansible-pull scheduled every minute" >> /var/log/ansible-pull.log
+
+# Configure timezone (optional)
+timezone: UTC
+
+# Configure locale (optional)
+locale: en_US.UTF-8
+
+# Configure keyboard (optional)
+keyboard:
+  layout: us
+
+# Power management - don't power off after installation
+power_state:
+  mode: reboot
+  delay: "+1"
+  message: "Rebooting after cloud-init setup"
+
+# Final message
+final_message: |
+  System setup complete!
+  
+  Ansible-pull demo has been configured and will run every minute.
+  
+  Key files:
+  - Runner script: /usr/local/bin/run-ansible-pull.sh
+  - Log file: /var/log/ansible-pull.log
+  - Cron job: Added to /etc/crontab
+  
+  To monitor the ansible-pull runs:
+  tail -f /var/log/ansible-pull.log
+  
+  To manually run ansible-pull:
+  /usr/local/bin/run-ansible-pull.sh
+  
+  System will reboot in 1 minute to ensure all services are properly started.
