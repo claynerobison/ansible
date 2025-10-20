@@ -6,7 +6,7 @@
 # using ansible-pull for local machine configuration
 
 - name: Configure local machine
-  hosts: localhost
+  hosts: demo_hosts
   connection: local
   become: yes
   gather_facts: yes

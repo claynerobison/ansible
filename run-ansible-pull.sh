@@ -16,7 +16,7 @@ fi
 
 echo "Starting ansible-pull at $(date)"
 
-# Run ansible-pull
+# Run ansible-pull (will only run if hostname is in inventory)
 ansible-pull \
     --url "$REPO_URL" \
     --checkout main \

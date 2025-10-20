@@ -35,6 +35,18 @@ ansible-pull \
 ## What the playbook does
 
 1. Updates package cache (Ubuntu/Debian and RHEL/CentOS)
+2. Only runs on hosts explicitly listed in the `demo_hosts` group in inventory
+
+## Security Model
+
+The playbook uses a whitelist approach - it will only execute on systems whose hostname is explicitly listed in the `demo/inventory` file under the `[demo_hosts]` group. If the current hostname is not found in the inventory, ansible-pull will show a warning and skip execution.
+
+To add a host, edit `demo/inventory` and add the hostname:
+```ini
+[demo_hosts]
+my-server-name ansible_connection=local
+another-host ansible_connection=local
+```
 
 Note: Git must be pre-installed for ansible-pull to work (since it's needed to clone this repository).
 
