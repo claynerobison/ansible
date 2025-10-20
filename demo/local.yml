@@ -22,3 +22,11 @@
       ansible.builtin.yum:
         update_cache: yes
       when: ansible_os_family == "RedHat"
+
+    - name: Update MOTD with ansible-pull information
+      ansible.builtin.copy:
+        content: "HEY! I just got installed from https://github.com/claynerobison/ansible by a cron job running ansible pull every minute!\n"
+        dest: /etc/motd
+        mode: '0644'
+        owner: root
+        group: root

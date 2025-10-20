@@ -1,11 +1,6 @@
 # Inventory for ansible-pull demo
-# Add hostnames here that are allowed to run this playbook
+# This will work on any host that runs ansible-pull
 
 [demo_hosts]
-# Add your specific hostnames here, for example:
-clx8995-vm05 ansible_connection=local
-# soc-PF50HEKC ansible_connection=local
-# my-server-01 ansible_connection=local
-
-# Fallback localhost for testing
-# localhost ansible_connection=local
+# Generic localhost entry that works on any machine
+localhost ansible_connection=local
